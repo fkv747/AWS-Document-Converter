@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Converter by Kev</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="scene">
+        <div class="container">
+            <h1>Document Converter by Kev</h1>
+            <p class="file-info">⚠️ Supported file types: <strong>.docx and .xlsx</strong></p>
+            <div class="input-group">
+                <label>Select Document:</label>
+                <input type="file" id="fileInput" accept=".docx,.xlsx,.txt">
+            </div>
+            <button onclick="handleFileUpload()">Convert Document</button>
+            <div id="status"></div>
+            <a id="downloadLink" href="#" target="_blank" style="display:none;">Download Converted PDF</a>
+        </div>
+        <div class="rocket-container">
+            <img src="rocket.gif" alt="Rocket" class="rocket-gif">
+        </div>
+    </div>
+
+    <script>
+        async function handleFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const statusDiv = document.getElementById('status');
+            const downloadLink = document.getElementById('downloadLink');
+            const file = fileInput.files[0];
+            const apiUrl = 'https://0he8r9yta7.execute-api.us-east-1.amazonaws.com/convert';
+            const checkApiUrl = 'https://0he8r9yta7.execute-api.us-east-1.amazonaws.com/check-pdf';
+            
+            if (!file) {
+                statusDiv.textContent = 'Please select a file first';
+                return;
+            }
+
+            try {
+                statusDiv.textContent = 'Getting upload URL...';
+
+                // Request upload URL from API Gateway
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_name: file.name, file_type: file.type })
+                });
+
+                const data = await response.json();
+
+                if (!data.upload_url) {
+                    throw new Error('Failed to get upload URL');
+                }
+
+                statusDiv.textContent = 'Uploading file...';
+
+                // Upload file to S3
+                const uploadResponse = await fetch(data.upload_url, {
+                    method: 'PUT',
+                    body: file,
+                    headers: { "Content-Type": file.type }
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                statusDiv.textContent = 'File uploaded successfully! Kevin is working on it...';
+
+                // Poll S3 for the converted file using API Gateway
+                checkIfFileExists(checkApiUrl, file.name, statusDiv, downloadLink);
+
+            } catch (error) {
+                statusDiv.textContent = 'Error: ' + error.message;
+                console.error('Full error:', error);
+            }
+        }
+
+        async function checkIfFileExists(checkApiUrl, fileName, statusDiv, downloadLink, attempts = 0) {
+            if (attempts >= 36) {  // Stop checking after 3 minutes
+                statusDiv.textContent = "Conversion is taking longer than expected. Try again later.";
+                return;
+            }
+
+            try {
+                // ✅ FIX: Convert the original file name to PDF format before checking.
+                const pdfFileName = fileName.replace(/\.[^.]+$/, ".pdf");
+                const encodedFileName = encodeURIComponent(`converted/${pdfFileName}`);
+
+                const response = await fetch(`${checkApiUrl}?file_name=${encodedFileName}`, { method: 'GET' });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("API Response:", data);  // ✅ Debugging log added
+
+                    if (data.url) {  // 🔥 FIX: Use `data.url` instead of `data.pdf_url`
+                        downloadLink.href = data.url;
+                        downloadLink.style.display = "block";
+                        downloadLink.textContent = "Download Converted PDF";
+                        statusDiv.textContent = "Conversion complete! Click the link below to download.";
+                        return;
+                    }
+                }
+                
+                // Retry after 5 seconds
+                setTimeout(() => checkIfFileExists(checkApiUrl, fileName, statusDiv, downloadLink, attempts + 1), 5000);
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                setTimeout(() => checkIfFileExists(checkApiUrl, fileName, statusDiv, downloadLink, attempts + 1), 5000);
+            }
+        }
+    </script>
+</body>
+</html>

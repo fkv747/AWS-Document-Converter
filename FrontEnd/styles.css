@@ -1,0 +1,124 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Century Gothic', sans-serif; /* Century Gothic font */
+    background-color: #FFFFFF; /* White background */
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+.scene {
+    position: relative; /* Allow absolute positioning of elements */
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Hide overflow */
+}
+
+.rocket-container {
+    position: absolute; /* Position the rocket relative to the scene */
+    bottom: -268px; /* Position it approximately 2 inches below the document converter area */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    z-index: -1; /* Send GIF behind other content */
+}
+
+.rocket-gif {
+    width: 1050px; /* Adjust size to make it 7x bigger than original (150px) */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.container {
+    position: relative; /* Allow stacking context for child elements */
+    max-width: 600px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.9); /* Slightly transparent background for better visibility */
+    padding: 40px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+h1 {
+    text-align: center;
+    color: #333; /* Dark text */
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="file"],
+select,
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px; /* Ensure readable font size */
+}
+
+input[type="file"] {
+    border: 1px solid #ccc; /* Light border for file input */
+}
+
+select {
+    background-color: #f8f8f8; /* Light background for select */
+    border: 1px solid #ccc; /* Light border */
+}
+
+button {
+    background-color: #f2c73a; /* Button color */
+    color: #333333; /* Dark text color */
+    font-weight: bold; /* Bold button text */
+    cursor: pointer; /* Show pointer cursor */
+    border: none; /* Remove border */
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+button:hover {
+    background-color: #d1b82b; /* Darker shade on hover */
+}
+
+button:focus {
+    outline: none; /* Remove focus outline */
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 16px;
+    text-align: center;
+}
+
+#result a {
+    color: #007bff; /* Link color */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold;
+}
+
+#result a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px; /* Reduce padding for smaller screens */
+    }
+
+    h1 {
+        font-size: 24px; /* Smaller font for mobile */
+    }
+
+    input[type="file"],
+    select,
+    button {
+        font-size: 14px; /* Adjust font size for mobile */
+    }
+}
